@@ -4,6 +4,7 @@ package flux.messages;
 service MessagesService {
     rpc CreateMessage(CreateMessageRequest) returns (CreateMessageResponse);
     rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
+    rpc GetMessage(GetMessageRequest) returns (GetMessageResponse);
 }
 
 message CreateMessageRequest {
@@ -25,6 +26,28 @@ message GetMessagesResponse {
 
     message Message {
         optional string message_id = 1;
+        optional string user_id = 2;
+        optional string text = 3;
+    }
+}
+
+message GetMessageRequest {
+    optional string message_id = 1;
+}
+
+message GetMessageResponse {
+    optional Message message = 1;
+    optional Stream stream = 2;
+    repeated string message_ids = 3;
+
+    message Message {
+        optional string message_id = 1;
+        optional string user_id = 2;
+        optional string text = 3;
+    }
+
+    message Stream {
+        optional string stream_id = 1;
         optional string text = 2;
     }
 }

@@ -5,7 +5,7 @@ use summarize_stream::SummarizeStreamRequest;
 use super::repo;
 
 pub async fn get_streams(db: &DbConn) -> Result<GetStreamsResponse, Error> {
-    let streams = repo::find_all_streams(db).await?;
+    let streams = repo::find_streams(db).await?;
 
     Ok(GetStreamsResponse { streams })
 }

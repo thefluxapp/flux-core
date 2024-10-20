@@ -1,12 +1,10 @@
 use flux_core_api::{
-    get_streams_response::Stream, streams_service_server::StreamsService, GetStreamsRequest,
-    GetStreamsResponse,
+    streams_service_server::StreamsService, GetStreamsRequest, GetStreamsResponse,
 };
 use tonic::{Request, Response, Status};
 
+use super::{repo, service};
 use crate::app::{error::AppError, state::AppState};
-
-use super::service;
 
 pub struct GrpcStreamsService {
     pub state: AppState,
@@ -36,29 +34,24 @@ async fn get_streams(AppState { db, .. }: &AppState) -> Result<GetStreamsRespons
     Ok(response.into())
 }
 
-// impl TryFrom<GetStreamsRequest> for service::GetStreamsRequest {
-//     type Error = AppError;
-
-//     fn try_from(request: GetStreamsRequest) -> Result<Self, Self::Error> {
-//         let data = Self {};
-//         data.validate()?;
-
-//         Ok(data)
-//     }
-// }
-
-impl Into<GetStreamsResponse> for service::GetStreamsResponse {
-    fn into(self) -> GetStreamsResponse {
+impl From<service::GetStreamsResponse> for GetStreamsResponse {
+    fn from(response: service::GetStreamsResponse) -> Self {
         GetStreamsResponse {
-            streams: self
+            streams: response
                 .streams
-                .iter()
-                .map(|stream| Stream {
-                    id: Some(stream.id.into()),
-                    message_id: Some(stream.message_id.into()),
-                    text: Some("QQQ".into()),
-                })
+                .into_iter()
+                .map(|stream| stream.into())
                 .collect(),
+        }
+    }
+}
+
+impl From<repo::stream::Model> for flux_core_api::get_streams_response::Stream {
+    fn from(stream: repo::stream::Model) -> Self {
+        Self {
+            stream_id: Some(stream.id.into()),
+            message_id: Some(stream.message_id.into()),
+            text: stream.text,
         }
     }
 }

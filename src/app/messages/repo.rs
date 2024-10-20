@@ -21,9 +21,9 @@ pub async fn create_message<T: ConnectionTrait>(
 
 pub async fn find_message_by_id<T: ConnectionTrait>(
     db: &T,
-    id: Uuid,
+    message_id: Uuid,
 ) -> Result<Option<message::Model>, Error> {
-    let message = message::Entity::find_by_id(id).one(db).await?;
+    let message = message::Entity::find_by_id(message_id).one(db).await?;
 
     Ok(message)
 }
@@ -102,4 +102,27 @@ pub async fn find_messages_by_ids<T: ConnectionTrait>(
         .await?;
 
     Ok(messages)
+}
+
+pub async fn find_stream_by_message_id<T: ConnectionTrait>(
+    db: &T,
+    stream_id: Uuid,
+) -> Result<Option<stream::Model>, Error> {
+    let message = stream::Entity::find()
+        .filter(stream::Column::MessageId.eq(stream_id))
+        .one(db)
+        .await?;
+
+    Ok(message)
+}
+
+pub async fn find_messages_by_stream_id<T: ConnectionTrait>(
+    db: &T,
+    stream_id: Uuid,
+) -> Result<Vec<message_stream::Model>, Error> {
+    Ok(message_stream::Entity::find()
+        .filter(message_stream::Column::StreamId.eq(stream_id))
+        .order_by_asc(message_stream::Column::MessageId)
+        .all(db)
+        .await?)
 }

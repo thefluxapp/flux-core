@@ -11,7 +11,7 @@ message GetStreamsResponse {
     repeated Stream streams = 1;
 
     message Stream {
-        optional string id = 1;
+        optional string stream_id = 1;
         optional string message_id = 2;
         optional string text = 3;
     }

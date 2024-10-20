@@ -1,14 +1,18 @@
 use anyhow::Error;
 use chrono::{DateTime, Utc};
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter, QuerySelect, Set,
+    ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter, QueryOrder,
+    QuerySelect, Set,
 };
 use uuid::Uuid;
 
 pub mod stream;
 
-pub async fn find_all_streams<T: ConnectionTrait>(db: &T) -> Result<Vec<stream::Model>, Error> {
-    let streams = stream::Entity::find().all(db).await?;
+pub async fn find_streams<T: ConnectionTrait>(db: &T) -> Result<Vec<stream::Model>, Error> {
+    let streams = stream::Entity::find()
+        .order_by_asc(stream::Column::Id)
+        .all(db)
+        .await?;
 
     Ok(streams)
 }
