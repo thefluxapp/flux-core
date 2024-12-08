@@ -16,3 +16,6 @@ consumer = "flux-core"
 [streams.messaging.subjects]
 request = "flux.streams.summarize.request"
 response = "flux.streams.summarize.response"
+
+[messages.messaging.message]
+subject = "flux.messages.message"

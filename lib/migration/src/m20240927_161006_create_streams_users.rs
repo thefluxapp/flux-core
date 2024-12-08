@@ -19,7 +19,7 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
-                    .name("streams_users_idx_streams_id_user_id")
+                    .name("streams_users_stream_id_user_id_udx")
                     .unique()
                     .table(StreamsUsers::Table)
                     .col(StreamsUsers::UserId)

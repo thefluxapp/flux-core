@@ -1,0 +1,24 @@
+syntax = "proto3";
+package flux.notify;
+
+import "google/protobuf/timestamp.proto";
+
+message Message {
+    optional Message message = 1;
+    optional Stream stream = 2;
+
+    message Message {
+        optional string message_id = 1;
+        optional string user_id = 2;
+        optional string text = 3;
+        optional string code = 4;
+        optional int64 order = 5;
+        optional google.protobuf.Timestamp created_at = 6;
+        optional google.protobuf.Timestamp updated_at = 7;
+    }
+
+    message Stream {
+        optional string stream_id = 1;
+        optional string message_id = 2;
+    }
+}

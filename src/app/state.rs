@@ -18,9 +18,9 @@ impl AppState {
         let nats = async_nats::connect(&settings.nats.endpoint).await?;
         let js = Arc::new(jetstream::new(nats));
 
-        let opt = ConnectOptions::new(&settings.db.endpoint);
-        // opt.sqlx_logging(true)
-        //     .sqlx_logging_level(log::LevelFilter::Info);
+        let mut opt = ConnectOptions::new(&settings.db.endpoint);
+        opt.sqlx_logging(true)
+            .sqlx_logging_level(log::LevelFilter::Debug);
         let db = Arc::new(Database::connect(opt).await?);
 
         Ok(Self { settings, js, db })

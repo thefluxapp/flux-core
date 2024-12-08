@@ -12,9 +12,23 @@ impl MigrationTrait for Migration {
                     .col(uuid(Messages::Id).primary_key())
                     .col(uuid(Messages::UserId))
                     .col(text(Messages::Text))
+                    .col(text(Messages::Code))
                     .to_owned(),
             )
-            .await
+            .await?;
+
+        manager
+            .create_index(
+                Index::create()
+                    .name("messages_code_udx")
+                    .unique()
+                    .table(Messages::Table)
+                    .col(Messages::Code)
+                    .to_owned(),
+            )
+            .await?;
+
+        Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
@@ -30,4 +44,5 @@ pub enum Messages {
     Id,
     Text,
     UserId,
+    Code,
 }

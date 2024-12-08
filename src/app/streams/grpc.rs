@@ -91,6 +91,7 @@ mod get_streams {
                 streams: response
                     .streams
                     .into_iter()
+                    .rev()
                     .map(|(stream, streams_users)| U(stream, streams_users).into())
                     .collect(),
             }

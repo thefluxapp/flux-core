@@ -104,7 +104,17 @@ pub async fn find_stream_by_message_id<T: ConnectionTrait>(
     Ok(message)
 }
 
-pub async fn find_prev_stream_by_message_id<T: ConnectionTrait>(
+pub async fn find_message_stream_by_message_id<T: ConnectionTrait>(
+    db: &T,
+    message_id: Uuid,
+) -> Result<Option<message_stream::Model>, Error> {
+    Ok(message_stream::Entity::find()
+        .filter(message_stream::Column::MessageId.eq(message_id))
+        .one(db)
+        .await?)
+}
+
+pub async fn find_parent_stream_by_message_id<T: ConnectionTrait>(
     db: &T,
     message_id: Uuid,
     stream_id: Uuid,

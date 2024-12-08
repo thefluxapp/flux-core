@@ -12,11 +12,24 @@ impl MigrationTrait for Migration {
                     .col(uuid(Streams::Id).primary_key())
                     .col(text_null(Streams::Title))
                     .col(text_null(Streams::Text))
-                    .col(uuid_uniq(Streams::MessageId))
+                    .col(uuid(Streams::MessageId))
                     .col(boolean(Streams::IsMain))
                     .to_owned(),
             )
-            .await
+            .await?;
+
+        manager
+            .create_index(
+                Index::create()
+                    .name("streams_message_id_udx")
+                    .unique()
+                    .table(Streams::Table)
+                    .col(Streams::MessageId)
+                    .to_owned(),
+            )
+            .await?;
+
+        Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {

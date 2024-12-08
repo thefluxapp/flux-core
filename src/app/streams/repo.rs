@@ -11,7 +11,8 @@ pub mod stream_user;
 
 pub async fn find_last_streams<T: ConnectionTrait>(db: &T) -> Result<Vec<stream::Model>, Error> {
     let streams = stream::Entity::find()
-        .order_by_asc(stream::Column::Id)
+        .filter(stream::Column::IsMain.eq(true))
+        // .filter(stream::Column::Text.is_not_null())
         .all(db)
         .await?;
 
@@ -31,7 +32,7 @@ pub async fn find_user_streams_with_streams_users<T: ConnectionTrait>(
                 .into(),
         )
         .filter(stream_user::Column::UserId.eq(user_id))
-        .order_by_asc(stream::Column::Id)
+        .order_by_desc(stream::Column::Id)
         .all(db)
         .await?;
 
