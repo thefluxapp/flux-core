@@ -1,3 +1,4 @@
+use anyhow::Error;
 use flux_core_api::{
     messages_service_server::MessagesService, CreateMessageRequest, CreateMessageResponse,
     GetMessageRequest, GetMessageResponse,
@@ -6,10 +7,7 @@ use tonic::{Request, Response, Status};
 
 use crate::app::{error::AppError, state::AppState};
 
-use super::{
-    repo,
-    service::{self},
-};
+use super::{repo, service};
 
 pub struct GrpcMessagesService {
     pub state: AppState,
@@ -53,6 +51,7 @@ async fn get_message(
 
 mod get_message {
     use flux_core_api::{get_message_response::Message, GetMessageRequest, GetMessageResponse};
+    use prost_types::Timestamp;
     use uuid::Uuid;
     use validator::ValidationErrors;
 
@@ -96,10 +95,16 @@ mod get_message {
                 message_id: Some(message.id.to_string()),
                 user_id: Some(message.user_id.to_string()),
                 text: Some(message.text),
+                code: Some(message.code),
                 stream_id: match stream {
                     Some(stream) => Some(stream.id.to_string()),
                     None => None,
                 },
+                order: Some(message.created_at.and_utc().timestamp_micros()),
+                created_at: Some(Timestamp {
+                    seconds: message.created_at.and_utc().timestamp(),
+                    nanos: 0,
+                }),
             }
         }
     }
@@ -118,16 +123,15 @@ async fn create_message(
         ));
     }
 
+    tokio::spawn(notify_message(
+        state.clone(),
+        service::notify_message::Req {
+            message: response.message.clone(),
+            stream: response.stream.clone(),
+        },
+    ));
+
     Ok(response)
-}
-
-async fn summarize_stream_by_message_id(
-    AppState { settings, db, js }: AppState,
-    stream: repo::stream::Model,
-) -> Result<(), AppError> {
-    service::summarize_stream_by_message_id(&db, &js, settings, stream).await?;
-
-    Ok(())
 }
 
 mod create_message {
@@ -143,6 +147,7 @@ mod create_message {
         fn try_from(request: CreateMessageRequest) -> Result<Self, Self::Error> {
             let data = Self {
                 text: request.text().into(),
+                code: request.code().into(),
                 user_id: Uuid::parse_str(request.user_id())
                     .map_err(|_| AppError::Validation(ValidationErrors::new()))?,
                 message_id: match request.message_id {
@@ -166,4 +171,22 @@ mod create_message {
             }
         }
     }
+}
+
+async fn notify_message(
+    AppState { js, settings, .. }: AppState,
+    req: service::notify_message::Req,
+) -> Result<(), Error> {
+    service::notify_message(&js, settings.messages.messaging, req).await?;
+
+    Ok(())
+}
+
+async fn summarize_stream_by_message_id(
+    AppState { settings, db, js }: AppState,
+    stream: repo::stream::Model,
+) -> Result<(), AppError> {
+    service::summarize_stream_by_message_id(&db, &js, settings, stream).await?;
+
+    Ok(())
 }

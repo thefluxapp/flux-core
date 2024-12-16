@@ -10,7 +10,7 @@ impl MigrationTrait for Migration {
             .create_table(
                 table_auto(MessagesStreams::Table)
                     .col(uuid(MessagesStreams::Id).primary_key())
-                    .col(uuid_uniq(MessagesStreams::MessageId))
+                    .col(uuid(MessagesStreams::MessageId))
                     .col(uuid(MessagesStreams::StreamId))
                     .to_owned(),
             )
@@ -19,14 +19,27 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
-                    .name("messages_streams_idx_message_id_streams_id")
+                    .name("messages_streams_message_id_stream_id_udx")
                     .unique()
                     .table(MessagesStreams::Table)
                     .col(MessagesStreams::MessageId)
                     .col(MessagesStreams::StreamId)
                     .to_owned(),
             )
-            .await
+            .await?;
+
+        manager
+            .create_index(
+                Index::create()
+                    .name("messages_streams_message_id_udx")
+                    .unique()
+                    .table(MessagesStreams::Table)
+                    .col(MessagesStreams::MessageId)
+                    .to_owned(),
+            )
+            .await?;
+
+        Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {

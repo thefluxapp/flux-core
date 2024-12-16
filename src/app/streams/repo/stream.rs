@@ -6,8 +6,9 @@ use serde::Serialize;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub text: Option<String>,
+    pub text: String,
     pub message_id: Uuid,
+    pub is_main: bool,
     pub created_at: DateTime,
     pub updated_at: DateTime,
 }

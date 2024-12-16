@@ -1,6 +1,7 @@
 use anyhow::Error;
 use async_nats::jetstream;
 use axum::Router;
+use log::info;
 use settings::AppSettings;
 use state::AppState;
 use tonic::service::Routes;
@@ -41,6 +42,7 @@ async fn http_and_grpc(state: &AppState) -> Result<(), Error> {
 
     let listener = tokio::net::TcpListener::bind(&state.settings.http.endpoint).await?;
 
+    info!("app: started");
     axum::serve(listener, router).await?;
 
     Ok(())
@@ -48,6 +50,8 @@ async fn http_and_grpc(state: &AppState) -> Result<(), Error> {
 
 async fn messaging(state: &AppState) -> Result<(), Error> {
     streams::messaging(&state).await?;
+
+    info!("messaging: started");
 
     Ok(())
 }

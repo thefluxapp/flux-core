@@ -12,4 +12,9 @@ fn main() {
         .file_descriptor_set_path(out_dir.join("streams_descriptor.bin"))
         .compile_protos(&["src/streams.proto"], &["src"])
         .unwrap();
+
+    tonic_build::configure()
+        .build_server(false)
+        .compile_protos(&["src/notify.proto"], &["src"])
+        .unwrap();
 }

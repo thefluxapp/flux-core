@@ -3,7 +3,7 @@ use std::env;
 use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
 
-use super::streams::settings::StreamsSettings;
+use super::{messages::settings::MessagesSettings, streams::settings::StreamsSettings};
 
 #[derive(Deserialize, Clone)]
 pub struct AppSettings {
@@ -12,6 +12,7 @@ pub struct AppSettings {
     pub nats: NATSSettings,
     pub db: DBSettings,
     pub streams: StreamsSettings,
+    pub messages: MessagesSettings,
 }
 
 #[derive(Deserialize, Clone)]
